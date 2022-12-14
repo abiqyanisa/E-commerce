@@ -35,57 +35,75 @@ def get_detail(index,data):
     print(f"https://cf.shopee.co.id/file/{data[index]['image']}\n")
 
 def menu() :
-    hias.ibox()
-    try :
-        pilih = int(input("\n[Ibox Official Shop]\n\n [1] iPhone \n [2] iPad\n [3] Apple Watch\n [4] Mac\n [5] Aksesoris Apple\n\n Pilih : "))
-    except :
-        os.system('cls')
-        hias.error()
-        time.sleep(2)
-        menu()
-    if pilih == 1 :
-        data = API_iBox.get_data(API_iBox.iphone)   
-    elif pilih == 2 : 
-        data = API_iBox.get_data(API_iBox.ipad)
+    while True:
+        hias.ibox()
+        try :
+            pilih = int(input("\n[Ibox Official Shop]\n\n [1] iPhone \n [2] iPad\n [3] Apple Watch\n [4] Mac\n [5] Aksesoris Apple\n\n Pilih : "))
+            if pilih == 1 :
+                data = API_iBox.get_data(API_iBox.iphone)   
+            elif pilih == 2 : 
+                data = API_iBox.get_data(API_iBox.ipad)
+            elif pilih == 3 : 
+                data = API_iBox.get_data(API_iBox.iwatch)
+            elif pilih == 4 : 
+                data = API_iBox.get_data(API_iBox.mac)
+            elif pilih == 5 : 
+                data = API_iBox.get_data(API_iBox.aksesoris)
+            else :
+                raise ValueError
+            os.system('cls')
+            break
+        except  ValueError:
+            os.system('cls')
+            hias.error()
+            print("\nMasukan anda tidak sesuai.")
+            time.sleep(2)
+            os.system('cls')
 
-    elif pilih == 3 : 
-        data = API_iBox.get_data(API_iBox.iwatch)
+    while True:
+        hias.ibox()
+        product_list(data)
+        print("[0] Back")
+        try :
+            index = int(input("\n\nPilih : "))
+            if index == 0 :
+                os.system('cls')
+                menu()
+            if index > 29 or index < 0 :
+                raise ValueError
+            os.system('cls')
+            break
+        except ValueError:
+            os.system('cls')
+            hias.error()
+            print("\nMasukan anda tidak sesuai.")
+            time.sleep(2)
+            os.system('cls')
 
-    elif pilih == 4 : 
-        data = API_iBox.get_data(API_iBox.mac)
+    while True:
+        os.system('cls')
+        hias.ibox()
+        get_detail(index,data)
+        print("[0] Back\n")
+        try:
+            qty = int(input('Jumlah Beli : '))  
+            if qty > data[index-1]['stock'] :
+                print(f"\nStok Tidak Cukup!\n[Stock] : {data[index-1]['stock']}")
+                raise ValueError
+            elif qty < 0 :
+                print("\nJumlah beli tidak dapat diproses.")
+                raise ValueError
+            elif qty == 0 :
+                os.system('cls')
+                menu()
+            else :
+                payment(index,qty,data)
+                break
+        except ValueError:
+            print()
+            hias.error()
+            time.sleep(2)
 
-    elif pilih == 5 : 
-        data = API_iBox.get_data(API_iBox.aksesoris)
-    else :
-        os.system('cls')
-        hias.error()
-        print("\nKategori Tidak Ada!")  
-        menu()
-
-    os.system('cls')
-    hias.ibox()
-    product_list(data) 
-    try :
-        index = int(input("\n\nPilih : "))
-    except :
-        os.system('cls')
-        hias.error()
-        time.sleep(2)
-        menu()
-    os.system('cls')
-    hias.ibox()
-    get_detail(index,data)
-    qty = int(input('Jumlah Beli : '))  
-    if qty > data[index-1]['stock'] :
-        print(f"\nStok Tidak Cukup!\n[Stock] : {data[index-1]['stock']}")
-        time.sleep(2)
-        os.system('cls')
-        menu()
-    elif qty <= 0 :
-        print("Jumlah beli tidak dapat diproses.")
-        menu()
-    else :
-        payment(index,qty,data)   
 
 def login() :
     global user, unem, alamat
@@ -166,36 +184,49 @@ def payment(index,qty,data):
         change = ubah.lower()
         if change == 'y' :
             alamat = input('\n[Masukkan Alamat]\t: ')
-    pil = input("\nCheckout?\n[Y/T] : ")
-    co = pil.upper()
-    print(co)
-    if co == 'Y' :
-        os.system('cls')
-        hias.co()
-        data[index]['stock'] -= qty
-        print('\n[BERHASIL MELAKUKAN CHECKOUT]\n')
-        print(f'[Nama Akun]\t\t: {unem}\n')
-        print(f"[Nama Barang]\t\t: {data[index]['name']}")
-        print(f"[Harga Barang]\t\t: {data[index]['price']}")
-        print(f'[Jumlah Barang]\t\t: {qty}')
-        print(f'[Total Harga]\t\t: Rp.{harga}\n')
-        print(f'[Alamat Pengiriman]\t: {alamat}')
+    while True :
+        #try :
+            pil = input("\nCheckout?\n[Y/T] : ")
+            co = pil.upper()
+            print(co)
+            if co == 'Y' :
+                os.system('cls')
+                hias.co()
+                data[index]['stock'] -= qty
+                print('\n[BERHASIL MELAKUKAN CHECKOUT]\n')
+                print(f'[Nama Akun]\t\t: {unem}\n')
+                print(f"[Nama Barang]\t\t: {data[index]['name']}")
+                print(f"[Harga Barang]\t\t: {data[index]['price']}")
+                print(f'[Jumlah Barang]\t\t: {qty}')
+                print(f'[Total Harga]\t\t: Rp.{harga}\n')
+                print(f'[Alamat Pengiriman]\t: {alamat}')
 
-        bukti = input("\nIngin mengunduh bukti transaksi?\n[Y/T] : ")
-        unduh = bukti.upper()     
-        if unduh == 'Y' :
-            file = open("Shopee Transaction.txt","w")
-            file.write("[SHOPEE CHECKOUT]\n\n")
+                while True :
+                    try :
+                        bukti = input("\nIngin mengunduh bukti transaksi?\n[Y/T] : ")
+                        unduh = bukti.upper()     
+                        if unduh == 'Y' :
+                            file = open("Shopee Transaction.txt","w")
+                            file.write("[SHOPEE CHECKOUT]\n\n")
 
-            file.write(f'[Nama Akun]\t\t: {unem}\n')
-            file.write(f"[Nama Barang]\t\t: {data[index]['name']}\n")
-            file.write(f"[Harga Barang]\t\t: {data[index]['price']}\n")
-            file.write(f'[Jumlah Barang]\t\t: {qty}\n')
-            file.write(f'[Total Harga]\t\t: Rp.{harga}\n')
-            file.write(f'[Alamat Pengiriman]\t: {alamat}\n')
-            file.close()
-            os.system('cls')
-            hias.co()
-            print("\nFile Sudah Diunduh.")         
-   
+                            file.write(f'[Nama Akun]\t\t: {unem}\n')
+                            file.write(f"[Nama Barang]\t\t: {data[index]['name']}\n")
+                            file.write(f"[Harga Barang]\t\t: {data[index]['price']}\n")
+                            file.write(f'[Jumlah Barang]\t\t: {qty}\n')
+                            file.write(f'[Total Harga]\t\t: Rp.{harga}\n')
+                            file.write(f'[Alamat Pengiriman]\t: {alamat}\n')
+                            file.close()
+                            os.system('cls')
+                            hias.co()
+                            print("\nFile Sudah Diunduh.")
+                        elif unduh == 'T' :
+                            hias.bye()
+                        break
+                    except ValueError :
+                        hias.error()
+                        print("\nInput yang anda masukkan tidak sesuai")
+                        time.sleep(2)
+
+        #except ValueError :
+
 login()
